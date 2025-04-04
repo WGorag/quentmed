@@ -1,0 +1,10 @@
+services:
+  svelte:
+    container_name: svelte
+    build: 
+      context: .
+      dockerfile: .Dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - .:/data
