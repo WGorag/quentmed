@@ -23,5 +23,36 @@ services:
       - minio-data:/data
     command: server /data --address ":9000" --console-address ":9001"
 
+  postgres:
+    image: postgres:15
+    container_name: kestra_postgres
+    environment:
+      POSTGRES_USER: "${POSTGRES_ROOT_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_ROOT_PWD}"
+      POSTGRES_DB: kestra
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  kestra:
+    image: kestra/kestra:latest-full
+    container_name: kestra
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      KESTRA_DATABASE_TYPE: postgresql
+      KESTRA_DATABASE_POSTGRESQL_URL: jdbc:postgresql://postgres:5432/kestra
+      KESTRA_DATABASE_POSTGRESQL_USERNAME: "${POSTGRES_ROOT_USER}"
+      KESTRA_DATABASE_POSTGRESQL_PASSWORD: "${POSTGRES_ROOT_PWD}"
+      KESTRA_SERVER_PORT: 8080
+    command: server local
+    volumes:
+      - kestra_storage:/app/storage
+      - kestra_temps:/app/tmp
+
 volumes:
   minio-data:
+  postgres_data:
+  kestra_storage:
+  kestra_temps:
